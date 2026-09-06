@@ -1,17 +1,31 @@
 import json
-import os
-from backend.models import Transaction
-File_Path = "data/transaction.json"
+from pathlib import Path
+
+try:
+    from backend.models import Transaction
+except ImportError:
+    from models import Transaction
+
+BASE_DIR = Path(__file__).resolve().parent
+DATA_DIR = BASE_DIR / "data"
+FILE_PATH = DATA_DIR / "transactions.json"
 
 def load_transactions():
-    if not os.path.exists(File_Path):
+    if not FILE_PATH.exists():
         return []
-    with open(File_Path,"r") as f:
-        data = json.load(f)
-        return [Transaction.from_dict(item) for item in data]
-def save_transactions(transactions):
-    data = [txn.to_dict() for txn in transactions]
-    os.makedirs(os.path.dirname(File_Path), exist_ok=True)
+    try:
+        with open(FILE_PATH, "r", encoding="utf-8") as f:
+            content = f.read().strip()
+            if not content:
+                return []
+            data = json.loads(content)
+            return [Transaction.from_dict(item) for item in data]
+    except Exception as e:
+        print(f"Error loading transactions: {e}")
+        return []
 
-    with open(File_Path,"w") as f:
-        json.dump(data,f,indent=4)
+def save_transactions(transactions):
+    DATA_DIR.mkdir(parents=True, exist_ok=True)
+    data = [txn.to_dict() for txn in transactions]
+    with open(FILE_PATH, "w", encoding="utf-8") as f:
+        json.dump(data, f, indent=4)
