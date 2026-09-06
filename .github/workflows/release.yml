@@ -73,18 +73,63 @@ jobs:
       - name: Verify Sidecar Binary Architecture
         shell: bash
         run: |
-          if [[ "${{ matrix.target }}" == *"windows"* ]]; then
-            SIDECAR="frontend/src-tauri/bin/pybridge-${{ matrix.target }}.exe"
+          TARGET="${{ matrix.target }}"
+          if [[ "$TARGET" == *"windows"* ]]; then
+            SIDECAR="frontend/src-tauri/bin/pybridge-${TARGET}.exe"
           else
-            SIDECAR="frontend/src-tauri/bin/pybridge-${{ matrix.target }}"
+            SIDECAR="frontend/src-tauri/bin/pybridge-${TARGET}"
           fi
-          echo "Verifying sidecar binary: $SIDECAR"
+
+          echo "=== Asserting Sidecar Binary Architecture for target '$TARGET' ==="
+          echo "Sidecar path: $SIDECAR"
+
           if [ ! -f "$SIDECAR" ]; then
             echo "Error: Sidecar binary $SIDECAR does not exist!"
             exit 1
           fi
-          if command -v file >/dev/null 2>&1; then
-            file "$SIDECAR"
+
+          if [[ "$TARGET" == *"windows"* ]]; then
+            python -c "
+import struct, sys
+path = sys.argv[1]
+with open(path, 'rb') as f:
+    data = f.read()
+pe_offset = struct.unpack('<I', data[0x3c:0x40])[0]
+machine = struct.unpack('<H', data[pe_offset+4:pe_offset+6])[0]
+if machine != 0x8664:
+    print(f'Error: Windows PE Machine header is {hex(machine)}, expected 0x8664 (x64)!')
+    sys.exit(1)
+print('SUCCESS: Verified Windows binary is 64-bit PE (0x8664).')
+" "$SIDECAR"
+          else
+            if ! command -v file >/dev/null 2>&1; then
+              echo "Error: 'file' command is missing on host runner."
+              exit 1
+            fi
+
+            FILE_OUT="$(file "$SIDECAR")"
+            echo "$FILE_OUT"
+
+            case "$TARGET" in
+              aarch64-apple-darwin)
+                if ! echo "$FILE_OUT" | grep -qiE "arm64|aarch64"; then
+                  echo "Error: Binary architecture mismatch! Expected arm64 for $TARGET, got: $FILE_OUT"
+                  exit 1
+                fi
+                echo "SUCCESS: Verified binary is arm64/aarch64."
+                ;;
+              x86_64-apple-darwin|x86_64-unknown-linux-gnu)
+                if ! echo "$FILE_OUT" | grep -qiE "x86_64|x86-64|amd64"; then
+                  echo "Error: Binary architecture mismatch! Expected x86_64 for $TARGET, got: $FILE_OUT"
+                  exit 1
+                fi
+                echo "SUCCESS: Verified binary is x86_64."
+                ;;
+              *)
+                echo "Error: Unrecognized target $TARGET"
+                exit 1
+                ;;
+            esac
           fi
 
       - name: Install frontend dependencies
