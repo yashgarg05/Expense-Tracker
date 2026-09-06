@@ -89,18 +89,12 @@ jobs:
           fi
 
           if [[ "$TARGET" == *"windows"* ]]; then
-            python -c "
-import struct, sys
-path = sys.argv[1]
-with open(path, 'rb') as f:
-    data = f.read()
-pe_offset = struct.unpack('<I', data[0x3c:0x40])[0]
-machine = struct.unpack('<H', data[pe_offset+4:pe_offset+6])[0]
-if machine != 0x8664:
-    print(f'Error: Windows PE Machine header is {hex(machine)}, expected 0x8664 (x64)!')
-    sys.exit(1)
-print('SUCCESS: Verified Windows binary is 64-bit PE (0x8664).')
-" "$SIDECAR"
+            echo "Checking PE header machine type for $SIDECAR..."
+            if ! python -c "import struct, sys; data = open(sys.argv[1], 'rb').read(); pe = struct.unpack('<I', data[0x3c:0x40])[0]; m = struct.unpack('<H', data[pe+4:pe+6])[0]; sys.exit(0 if m == 0x8664 else 1)" "$SIDECAR"; then
+              echo "Error: Windows PE Machine header is not 0x8664 (x64)!"
+              exit 1
+            fi
+            echo "SUCCESS: Verified Windows binary is 64-bit PE (0x8664)."
           else
             if ! command -v file >/dev/null 2>&1; then
               echo "Error: 'file' command is missing on host runner."
