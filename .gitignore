@@ -1,0 +1,24 @@
+# macOS
+.DS_Store
+
+# Python
+__pycache__/
+*.pyc
+*.pyo
+
+# Python virtual environments
+.venv/
+venv/
+env/
+
+# Backend local data
+data/transaction.json
+
+# Node
+node_modules/
+dist/
+
+# Environment files
+.env
+.env.*
+!.env.example
