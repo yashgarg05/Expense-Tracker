@@ -1,4 +1,4 @@
-import { useState, useEffect, useMemo } from 'react';
+import { useState, useEffect, useMemo, useCallback } from 'react';
 import { AppShell } from './components/layout/AppShell';
 import { Overview } from './pages/Overview';
 import { Transactions } from './pages/Transactions';
@@ -6,6 +6,8 @@ import { Analytics } from './pages/Analytics';
 import { Settings } from './pages/Settings';
 import { TransactionDialog } from './components/transactions/TransactionDialog';
 import { DeleteTransactionDialog } from './components/transactions/DeleteTransactionDialog';
+import { ToastProvider } from './components/ui/toast';
+import { useToast } from './components/ui/use-toast';
 import {
   getTransactions,
   addTransaction,
@@ -18,10 +20,13 @@ import type { Transaction, ActivePage } from './types/transaction';
 import { AlertCircle, RefreshCw } from 'lucide-react';
 import { Button } from './components/ui/button';
 
-export function App() {
+function MainApp() {
+  const toast = useToast();
   const [activePage, setActivePage] = useState<ActivePage>('overview');
   const [transactions, setTransactions] = useState<Transaction[]>([]);
   const [isLoading, setIsLoading] = useState<boolean>(true);
+  const [isSaving, setIsSaving] = useState<boolean>(false);
+  const [isDeleting, setIsDeleting] = useState<boolean>(false);
   const [error, setError] = useState<string | null>(null);
 
   // Derived sorted transactions: newest date first, newest insertion first for same date
@@ -37,7 +42,7 @@ export function App() {
   const [deletingTransaction, setDeletingTransaction] =
     useState<Transaction | null>(null);
 
-  const fetchTransactions = async () => {
+  const fetchTransactions = useCallback(async () => {
     setIsLoading(true);
     setError(null);
     try {
@@ -45,15 +50,41 @@ export function App() {
       setTransactions(data);
     } catch (err) {
       console.error('Failed to load transactions:', err);
-      setError(err instanceof Error ? err.message : String(err));
+      const errMsg = err instanceof Error ? err.message : String(err);
+      setError(errMsg);
+      toast.error(`Backend connection error: ${errMsg}`);
     } finally {
       setIsLoading(false);
     }
-  };
+  }, [toast]);
 
   useEffect(() => {
-    fetchTransactions();
-  }, []);
+    let isMounted = true;
+    getTransactions()
+      .then((data) => {
+        if (isMounted) {
+          setTransactions(data);
+          setError(null);
+        }
+      })
+      .catch((err) => {
+        if (isMounted) {
+          console.error('Failed to load transactions:', err);
+          const errMsg = err instanceof Error ? err.message : String(err);
+          setError(errMsg);
+          toast.error(`Backend connection error: ${errMsg}`);
+        }
+      })
+      .finally(() => {
+        if (isMounted) {
+          setIsLoading(false);
+        }
+      });
+
+    return () => {
+      isMounted = false;
+    };
+  }, [toast]);
 
   // Open modal for adding new item
   const handleOpenAddModal = () => {
@@ -71,6 +102,7 @@ export function App() {
   const handleSaveTransaction = async (
     data: Omit<Transaction, 'id'> & { id?: string }
   ) => {
+    setIsSaving(true);
     try {
       if (data.id) {
         // Update existing
@@ -78,14 +110,20 @@ export function App() {
         setTransactions((prev) =>
           prev.map((t) => (t.id === updated.id ? updated : t))
         );
+        toast.success('Transaction updated successfully');
       } else {
         // Create new
         const created = await addTransaction(data);
         setTransactions((prev) => [...prev, created]);
+        toast.success('Transaction added successfully');
       }
+      setIsAddModalOpen(false);
     } catch (err) {
       console.error('Failed to save transaction:', err);
-      alert(`Error saving transaction: ${err instanceof Error ? err.message : String(err)}`);
+      const errMsg = err instanceof Error ? err.message : String(err);
+      toast.error(`Failed to save transaction: ${errMsg}`);
+    } finally {
+      setIsSaving(false);
     }
   };
 
@@ -96,15 +134,20 @@ export function App() {
 
   const handleConfirmDelete = async () => {
     if (!deletingTransaction) return;
+    setIsDeleting(true);
     try {
       await deleteTransaction(deletingTransaction.id);
       setTransactions((prev) =>
         prev.filter((t) => t.id !== deletingTransaction.id)
       );
+      toast.success('Transaction deleted');
       setDeletingTransaction(null);
     } catch (err) {
       console.error('Failed to delete transaction:', err);
-      alert(`Error deleting transaction: ${err instanceof Error ? err.message : String(err)}`);
+      const errMsg = err instanceof Error ? err.message : String(err);
+      toast.error(`Failed to delete transaction: ${errMsg}`);
+    } finally {
+      setIsDeleting(false);
     }
   };
 
@@ -113,9 +156,11 @@ export function App() {
     try {
       await clearTransactions();
       setTransactions([]);
+      toast.success('All transactions cleared');
     } catch (err) {
       console.error('Failed to clear transactions:', err);
-      alert(`Error clearing transactions: ${err instanceof Error ? err.message : String(err)}`);
+      const errMsg = err instanceof Error ? err.message : String(err);
+      toast.error(`Failed to clear transactions: ${errMsg}`);
     }
   };
 
@@ -158,6 +203,7 @@ export function App() {
                 onEdit={handleOpenEditModal}
                 onDelete={handleOpenDeleteModal}
                 onOpenAddModal={handleOpenAddModal}
+                isDeleting={isDeleting}
               />
             )}
 
@@ -174,10 +220,15 @@ export function App() {
 
       {/* Add / Edit Dialog */}
       <TransactionDialog
+        key={isAddModalOpen ? (editingTransaction?.id ?? 'add-modal') : 'closed'}
         isOpen={isAddModalOpen}
-        onClose={() => setIsAddModalOpen(false)}
+        onClose={() => {
+          setIsAddModalOpen(false);
+          setEditingTransaction(null);
+        }}
         onSave={handleSaveTransaction}
         initialData={editingTransaction}
+        isSaving={isSaving}
       />
 
       {/* Delete Confirmation Dialog */}
@@ -191,5 +242,12 @@ export function App() {
   );
 }
 
-export default App;
+export function App() {
+  return (
+    <ToastProvider>
+      <MainApp />
+    </ToastProvider>
+  );
+}
 
+export default App;

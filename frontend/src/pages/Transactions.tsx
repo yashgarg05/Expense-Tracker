@@ -6,6 +6,7 @@ interface TransactionsPageProps {
   onEdit: (transaction: Transaction) => void;
   onDelete: (transaction: Transaction) => void;
   onOpenAddModal: () => void;
+  isDeleting?: boolean;
 }
 
 export const Transactions: React.FC<TransactionsPageProps> = ({
@@ -13,6 +14,7 @@ export const Transactions: React.FC<TransactionsPageProps> = ({
   onEdit,
   onDelete,
   onOpenAddModal,
+  isDeleting = false,
 }) => {
   return (
     <div className="space-y-6">
@@ -21,6 +23,7 @@ export const Transactions: React.FC<TransactionsPageProps> = ({
         onEdit={onEdit}
         onDelete={onDelete}
         onOpenAddModal={onOpenAddModal}
+        isDeleting={isDeleting}
       />
     </div>
   );

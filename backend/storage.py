@@ -1,4 +1,5 @@
 import json
+import sys
 from pathlib import Path
 
 try:
@@ -21,8 +22,9 @@ def load_transactions():
             data = json.loads(content)
             return [Transaction.from_dict(item) for item in data]
     except Exception as e:
-        print(f"Error loading transactions: {e}")
-        return []
+        print(f"Error loading transactions: {e}", file=sys.stderr)
+        raise e
+
 
 def save_transactions(transactions):
     DATA_DIR.mkdir(parents=True, exist_ok=True)

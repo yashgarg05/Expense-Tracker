@@ -79,7 +79,7 @@ export const Analytics: React.FC<AnalyticsProps> = ({ transactions }) => {
       {/* Main Charts */}
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
         <div className="lg:col-span-7">
-          <CashFlowChart />
+          <CashFlowChart transactions={transactions} />
         </div>
         <div className="lg:col-span-5">
           <CategoryChart transactions={transactions} />

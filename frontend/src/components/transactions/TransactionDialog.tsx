@@ -1,7 +1,7 @@
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import type { Transaction, CategoryType, TransactionType } from '../../types/transaction';
 import { Button } from '@/components/ui/button';
-import { X } from 'lucide-react';
+import { X, Loader2 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
 interface TransactionDialogProps {
@@ -9,6 +9,7 @@ interface TransactionDialogProps {
   onClose: () => void;
   onSave: (transaction: Omit<Transaction, 'id'> & { id?: string }) => void;
   initialData?: Transaction | null;
+  isSaving?: boolean;
 }
 
 const CATEGORIES: CategoryType[] = [
@@ -29,34 +30,15 @@ export const TransactionDialog: React.FC<TransactionDialogProps> = ({
   onClose,
   onSave,
   initialData,
+  isSaving = false,
 }) => {
-  const [tType, setTType] = useState<TransactionType>('expense');
-  const [title, setTitle] = useState('');
-  const [amount, setAmount] = useState('');
-  const [category, setCategory] = useState<CategoryType>('Food');
-  const [date, setDate] = useState(new Date().toISOString().split('T')[0]);
-  const [note, setNote] = useState('');
+  const [tType, setTType] = useState<TransactionType>(initialData?.t_type ?? 'expense');
+  const [title, setTitle] = useState(initialData?.title ?? '');
+  const [amount, setAmount] = useState(initialData ? initialData.amount.toString() : '');
+  const [category, setCategory] = useState<CategoryType>(initialData?.category ?? 'Food');
+  const [date, setDate] = useState(initialData?.date ?? new Date().toISOString().split('T')[0]);
+  const [note, setNote] = useState(initialData?.note ?? '');
   const [errors, setErrors] = useState<{ [key: string]: string }>({});
-
-  useEffect(() => {
-    if (initialData) {
-      setTType(initialData.t_type);
-      setTitle(initialData.title);
-      setAmount(initialData.amount.toString());
-      setCategory(initialData.category);
-      setDate(initialData.date);
-      setNote(initialData.note || '');
-    } else {
-      // Default reset
-      setTType('expense');
-      setTitle('');
-      setAmount('');
-      setCategory('Food');
-      setDate(new Date().toISOString().split('T')[0]);
-      setNote('');
-    }
-    setErrors({});
-  }, [initialData, isOpen]);
 
   if (!isOpen) return null;
 
@@ -72,8 +54,8 @@ export const TransactionDialog: React.FC<TransactionDialogProps> = ({
     if (!category) {
       errs.category = 'Category is required';
     }
-    if (!date) {
-      errs.date = 'Date is required';
+    if (!date || isNaN(new Date(date).getTime())) {
+      errs.date = 'Valid date is required';
     }
     setErrors(errs);
     return Object.keys(errs).length === 0;
@@ -81,7 +63,7 @@ export const TransactionDialog: React.FC<TransactionDialogProps> = ({
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    if (!validate()) return;
+    if (isSaving || !validate()) return;
 
     onSave({
       id: initialData?.id,
@@ -92,7 +74,6 @@ export const TransactionDialog: React.FC<TransactionDialogProps> = ({
       date,
       note: note.trim(),
     });
-    onClose();
   };
 
   return (
@@ -100,7 +81,7 @@ export const TransactionDialog: React.FC<TransactionDialogProps> = ({
       {/* Backdrop */}
       <div
         className="fixed inset-0 bg-black/60 backdrop-blur-xs transition-opacity"
-        onClick={onClose}
+        onClick={isSaving ? undefined : onClose}
       />
 
       {/* Modal Dialog Content */}
@@ -113,13 +94,14 @@ export const TransactionDialog: React.FC<TransactionDialogProps> = ({
             </h2>
             <p className="text-xs text-muted-foreground">
               {initialData
-                ? 'Update transaction details in local state.'
+                ? 'Update transaction details in your backend.'
                 : 'Record a new income or expense item.'}
             </p>
           </div>
           <button
+            disabled={isSaving}
             onClick={onClose}
-            className="rounded-lg p-1.5 text-muted-foreground hover:bg-muted hover:text-foreground transition-colors"
+            className="rounded-lg p-1.5 text-muted-foreground hover:bg-muted hover:text-foreground transition-colors disabled:opacity-50"
           >
             <X className="h-4 w-4" />
           </button>
@@ -133,6 +115,7 @@ export const TransactionDialog: React.FC<TransactionDialogProps> = ({
             <div className="grid grid-cols-2 gap-1 rounded-lg bg-muted p-1 border border-border">
               <button
                 type="button"
+                disabled={isSaving}
                 onClick={() => {
                   setTType('expense');
                   if (category === 'Salary' || category === 'Freelance') {
@@ -150,6 +133,7 @@ export const TransactionDialog: React.FC<TransactionDialogProps> = ({
               </button>
               <button
                 type="button"
+                disabled={isSaving}
                 onClick={() => {
                   setTType('income');
                   if (category !== 'Salary' && category !== 'Freelance') {
@@ -176,11 +160,12 @@ export const TransactionDialog: React.FC<TransactionDialogProps> = ({
             <input
               id="tx-title"
               type="text"
+              disabled={isSaving}
               placeholder="e.g. Swiggy Order, Monthly Rent, Salary"
               value={title}
               onChange={(e) => setTitle(e.target.value)}
               className={cn(
-                'w-full rounded-lg border bg-background px-3 py-2 text-xs text-foreground placeholder:text-muted-foreground outline-none focus:border-ring focus:ring-1 focus:ring-ring transition-colors',
+                'w-full rounded-lg border bg-background px-3 py-2 text-xs text-foreground placeholder:text-muted-foreground outline-none focus:border-ring focus:ring-1 focus:ring-ring transition-colors disabled:opacity-60',
                 errors.title ? 'border-rose-500' : 'border-input'
               )}
             />
@@ -200,11 +185,12 @@ export const TransactionDialog: React.FC<TransactionDialogProps> = ({
                 id="tx-amount"
                 type="number"
                 step="any"
+                disabled={isSaving}
                 placeholder="0.00"
                 value={amount}
                 onChange={(e) => setAmount(e.target.value)}
                 className={cn(
-                  'w-full rounded-lg border bg-background px-3 py-2 text-xs font-mono text-foreground placeholder:text-muted-foreground outline-none focus:border-ring focus:ring-1 focus:ring-ring transition-colors',
+                  'w-full rounded-lg border bg-background px-3 py-2 text-xs font-mono text-foreground placeholder:text-muted-foreground outline-none focus:border-ring focus:ring-1 focus:ring-ring transition-colors disabled:opacity-60',
                   errors.amount ? 'border-rose-500' : 'border-input'
                 )}
               />
@@ -220,9 +206,10 @@ export const TransactionDialog: React.FC<TransactionDialogProps> = ({
               </label>
               <select
                 id="tx-category"
+                disabled={isSaving}
                 value={category}
                 onChange={(e) => setCategory(e.target.value as CategoryType)}
-                className="w-full rounded-lg border border-input bg-background px-3 py-2 text-xs text-foreground outline-none focus:border-ring focus:ring-1 focus:ring-ring transition-colors"
+                className="w-full rounded-lg border border-input bg-background px-3 py-2 text-xs text-foreground outline-none focus:border-ring focus:ring-1 focus:ring-ring transition-colors disabled:opacity-60"
               >
                 {CATEGORIES.map((cat) => (
                   <option key={cat} value={cat}>
@@ -241,10 +228,11 @@ export const TransactionDialog: React.FC<TransactionDialogProps> = ({
             <input
               id="tx-date"
               type="date"
+              disabled={isSaving}
               value={date}
               onChange={(e) => setDate(e.target.value)}
               className={cn(
-                'w-full rounded-lg border bg-background px-3 py-2 text-xs text-foreground outline-none focus:border-ring focus:ring-1 focus:ring-ring transition-colors',
+                'w-full rounded-lg border bg-background px-3 py-2 text-xs text-foreground outline-none focus:border-ring focus:ring-1 focus:ring-ring transition-colors disabled:opacity-60',
                 errors.date ? 'border-rose-500' : 'border-input'
               )}
             />
@@ -261,20 +249,22 @@ export const TransactionDialog: React.FC<TransactionDialogProps> = ({
             <textarea
               id="tx-note"
               rows={2}
+              disabled={isSaving}
               placeholder="Add extra details or comments..."
               value={note}
               onChange={(e) => setNote(e.target.value)}
-              className="w-full rounded-lg border border-input bg-background px-3 py-2 text-xs text-foreground placeholder:text-muted-foreground outline-none focus:border-ring focus:ring-1 focus:ring-ring transition-colors resize-none"
+              className="w-full rounded-lg border border-input bg-background px-3 py-2 text-xs text-foreground placeholder:text-muted-foreground outline-none focus:border-ring focus:ring-1 focus:ring-ring transition-colors resize-none disabled:opacity-60"
             />
           </div>
 
           {/* Dialog Action Buttons */}
           <div className="flex items-center justify-end gap-2 pt-3 border-t border-border">
-            <Button type="button" variant="outline" size="sm" onClick={onClose}>
+            <Button type="button" variant="outline" size="sm" onClick={onClose} disabled={isSaving}>
               Cancel
             </Button>
-            <Button type="submit" size="sm">
-              {initialData ? 'Save Changes' : 'Add Transaction'}
+            <Button type="submit" size="sm" disabled={isSaving} className="gap-1.5">
+              {isSaving && <Loader2 className="h-3.5 w-3.5 animate-spin" />}
+              <span>{isSaving ? 'Saving...' : initialData ? 'Save Changes' : 'Add Transaction'}</span>
             </Button>
           </div>
         </form>
@@ -282,3 +272,4 @@ export const TransactionDialog: React.FC<TransactionDialogProps> = ({
     </div>
   );
 };
+

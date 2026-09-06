@@ -80,7 +80,10 @@ export const CategoryChart: React.FC<CategoryChartProps> = ({
                     color: 'var(--popover-foreground)',
                     fontSize: '12px',
                   }}
-                  formatter={(value?: any) => [formatCurrency(Number(value || 0)), 'Spent']}
+                  formatter={(value?: number | string | ReadonlyArray<number | string>) => [
+                    formatCurrency(Number(Array.isArray(value) ? value[0] : value || 0)),
+                    'Spent',
+                  ]}
                 />
               </PieChart>
             </ResponsiveContainer>
