@@ -3,23 +3,23 @@
 
 # Python
 __pycache__/
-*.pyc
-*.pyo
+*.py[cod]
 
 # Python virtual environments
 .venv/
 venv/
 env/
 
-# Backend local data
-data/transaction.json
+# Expense Tracker data
+backend/data/transactions.json
 
 # Node
 node_modules/
-dist/
+frontend/dist/
+
+# Tauri
+frontend/src-tauri/target/
 
 # Environment files
 .env
 .env.*
-!.env.example
-backend/data/transactions.json
