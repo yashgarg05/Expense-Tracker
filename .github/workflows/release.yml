@@ -1,0 +1,106 @@
+name: Release App
+
+on:
+  push:
+    tags:
+      - 'v*'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  release:
+    permissions:
+      contents: write
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - platform: 'macos-latest'
+            target: 'aarch64-apple-darwin'
+          - platform: 'macos-15-intel'
+            target: 'x86_64-apple-darwin'
+          - platform: 'windows-latest'
+            target: 'x86_64-pc-windows-msvc'
+          - platform: 'ubuntu-22.04'
+            target: 'x86_64-unknown-linux-gnu'
+
+    runs-on: ${{ matrix.platform }}
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Install PyInstaller
+        run: python -m pip install pyinstaller
+
+      - name: Setup Rust toolchain
+        uses: dtolnay/rust-toolchain@stable
+        with:
+          targets: ${{ matrix.target }}
+
+      - name: Install Linux dependencies
+        if: matrix.platform == 'ubuntu-22.04'
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y libwebkit2gtk-4.1-dev libgtk-3-dev libayatana-appindicator3-dev librsvg2-dev patchelf
+
+      - name: Verify Runner & Python Architecture
+        shell: bash
+        run: |
+          echo "=== Runner OS/Arch ==="
+          uname -a || true
+          echo "=== Python Architecture ==="
+          python -c "import platform; print('Machine:', platform.machine(), '| Architecture:', platform.architecture())"
+
+      - name: Build Python Sidecar
+        shell: bash
+        run: |
+          chmod +x ./scripts/build-sidecar.sh
+          ./scripts/build-sidecar.sh ${{ matrix.target }}
+
+      - name: Verify Sidecar Binary Architecture
+        shell: bash
+        run: |
+          if [[ "${{ matrix.target }}" == *"windows"* ]]; then
+            SIDECAR="frontend/src-tauri/bin/pybridge-${{ matrix.target }}.exe"
+          else
+            SIDECAR="frontend/src-tauri/bin/pybridge-${{ matrix.target }}"
+          fi
+          echo "Verifying sidecar binary: $SIDECAR"
+          if [ ! -f "$SIDECAR" ]; then
+            echo "Error: Sidecar binary $SIDECAR does not exist!"
+            exit 1
+          fi
+          if command -v file >/dev/null 2>&1; then
+            file "$SIDECAR"
+          fi
+
+      - name: Install frontend dependencies
+        run: |
+          cd frontend
+          npm ci || npm install
+
+      - name: Build Tauri App & Publish Release
+        uses: tauri-apps/tauri-action@v0
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          projectPath: ./frontend
+          tagName: ${{ github.ref_type == 'tag' && github.ref_name || 'v__VERSION__' }}
+          releaseName: 'Expense Tracker v__VERSION__'
+          releaseBody: 'Installers for Expense Tracker across supported desktop platforms.'
+          releaseDraft: true
+          prerelease: false
+          args: --target ${{ matrix.target }}

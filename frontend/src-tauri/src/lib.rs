@@ -16,39 +16,67 @@ fn get_dev_bridge_path() -> PathBuf {
   cwd.join("..").join("..").join("backend").join("bridge.py")
 }
 
+fn target_triple() -> &'static str {
+  if cfg!(all(target_os = "macos", target_arch = "aarch64")) {
+    "aarch64-apple-darwin"
+  } else if cfg!(all(target_os = "macos", target_arch = "x86_64")) {
+    "x86_64-apple-darwin"
+  } else if cfg!(all(target_os = "windows", target_arch = "x86_64")) {
+    "x86_64-pc-windows-msvc"
+  } else if cfg!(all(target_os = "linux", target_arch = "x86_64")) {
+    "x86_64-unknown-linux-gnu"
+  } else {
+    if cfg!(target_os = "macos") {
+      "aarch64-apple-darwin"
+    } else if cfg!(target_os = "windows") {
+      "x86_64-pc-windows-msvc"
+    } else {
+      "x86_64-unknown-linux-gnu"
+    }
+  }
+}
+
 fn get_sidecar_path(app: &AppHandle) -> Option<PathBuf> {
-  // In release / production build, check executable directory (MacOS/) or resource directory
+  let triple = target_triple();
+  let ext = if cfg!(target_os = "windows") { ".exe" } else { "" };
+  let sidecar_name = format!("pybridge-{}{}", triple, ext);
+  let sidecar_base = format!("pybridge{}", ext);
+
+  // 1. Check executable directory (e.g. MacOS/ or app folder)
   if let Ok(exe_path) = std::env::current_exe() {
     if let Some(exe_dir) = exe_path.parent() {
-      let sidecar_name = format!("pybridge-{}", target_triple());
       let candidate1 = exe_dir.join(&sidecar_name);
       if candidate1.exists() {
         return Some(candidate1);
       }
-      let candidate2 = exe_dir.join("pybridge");
+      let candidate2 = exe_dir.join(&sidecar_base);
       if candidate2.exists() {
         return Some(candidate2);
       }
     }
   }
 
+  // 2. Check resource directory
   if let Ok(res_dir) = app.path().resource_dir() {
-    let sidecar_name = format!("pybridge-{}", target_triple());
     let candidate1 = res_dir.join("bin").join(&sidecar_name);
     if candidate1.exists() {
       return Some(candidate1);
     }
-    let candidate2 = res_dir.join("bin").join("pybridge");
+    let candidate2 = res_dir.join("bin").join(&sidecar_base);
     if candidate2.exists() {
       return Some(candidate2);
+    }
+    let candidate3 = res_dir.join(&sidecar_name);
+    if candidate3.exists() {
+      return Some(candidate3);
+    }
+    let candidate4 = res_dir.join(&sidecar_base);
+    if candidate4.exists() {
+      return Some(candidate4);
     }
   }
 
   None
-}
-
-fn target_triple() -> &'static str {
-  "aarch64-apple-darwin"
 }
 
 fn run_python_bridge(
@@ -69,13 +97,13 @@ fn run_python_bridge(
   let payload_str = payload.map(|v| v.to_string()).unwrap_or_else(|| "{}".to_string());
 
   let mut cmd = if let Some(path) = sidecar_path {
-    // Production Sidecar mode
+    // Production / Bundled sidecar mode
     let mut c = std::process::Command::new(path);
     c.arg(command);
     c.arg(&payload_str);
     c.env("EXPENSE_TRACKER_DATA_DIR", &app_data_dir);
     c
-  } else {
+  } else if cfg!(debug_assertions) {
     // Development mode with system python
     let python_bin = if std::process::Command::new("python3").arg("--version").output().is_ok() {
       "python3"
@@ -87,8 +115,20 @@ fn run_python_bridge(
     c.arg(&bridge_path);
     c.arg(command);
     c.arg(&payload_str);
+    c.env("EXPENSE_TRACKER_DATA_DIR", &app_data_dir);
     c
+  } else {
+    return Err(format!(
+      "Production build error: Sidecar binary not found for target triple '{}'.",
+      target_triple()
+    ));
   };
+
+  #[cfg(target_os = "windows")]
+  {
+    use std::os::windows::process::CommandExt;
+    cmd.creation_flags(0x08000000); // CREATE_NO_WINDOW
+  }
 
   let output = cmd
     .output()
