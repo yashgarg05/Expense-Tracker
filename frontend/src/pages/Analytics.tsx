@@ -2,6 +2,7 @@ import type { Transaction, CategoryType } from '../types/transaction';
 import { CashFlowChart } from '../components/dashboard/CashFlowChart';
 import { CategoryChart } from '../components/dashboard/CategoryChart';
 import { formatCurrency, CATEGORY_COLORS } from '@/lib/formatters';
+import { calculateSummaryStats } from '@/lib/calculations';
 import { Sparkles, Award, ArrowUpRight } from 'lucide-react';
 
 interface AnalyticsProps {
@@ -9,6 +10,8 @@ interface AnalyticsProps {
 }
 
 export const Analytics: React.FC<AnalyticsProps> = ({ transactions }) => {
+  const stats = calculateSummaryStats(transactions);
+
   // Compute top spending categories
   const expenseTx = transactions.filter((t) => t.t_type === 'expense');
   const categoryMap = expenseTx.reduce((acc, t) => {
@@ -26,8 +29,42 @@ export const Analytics: React.FC<AnalyticsProps> = ({ transactions }) => {
     }))
     .sort((a, b) => b.amount - a.amount);
 
+  // Dynamic Insight 1 (Smart Insight)
+  let insightHeadline = 'No transaction insights available yet.';
+  let insightSubtext = 'Add transaction data to generate automated financial insights.';
+
+  if (topCategories.length > 0) {
+    const topCat = topCategories[0];
+    insightHeadline = `${topCat.category} is your highest expenditure.`;
+    insightSubtext = `Total spending of ${formatCurrency(topCat.amount)} recorded across ${topCat.category.toLowerCase()}.`;
+  }
+
+  // Dynamic Insight 2 (Category Highlight)
+  let categoryHeadline = 'No expense categories yet.';
+  let categorySubtext = 'No expenses recorded across any category.';
+
+  if (topCategories.length > 0) {
+    categoryHeadline = `${topCategories[0].category} is your top expense category.`;
+    categorySubtext = `Accounting for ${topCategories[0].percent.toFixed(1)}% of total outflow.`;
+  }
+
+  // Dynamic Insight 3 (Savings Trend)
+  let savingsHeadline = 'Savings rate: 0.0%';
+  let savingsSubtext = 'No transaction data available to calculate savings.';
+
+  if (transactions.length > 0) {
+    if (stats.savingsRateMoM.changePercent !== null) {
+      const change = stats.savingsRateMoM.changePercent;
+      savingsHeadline = `Savings rate ${change >= 0 ? 'increased by +' : 'decreased by '}${Math.abs(change).toFixed(1)} percentage points.`;
+      savingsSubtext = `Current net savings rate stands at ${stats.savingsRate.toFixed(1)}%.`;
+    } else {
+      savingsHeadline = `Current net savings rate is ${stats.savingsRate.toFixed(1)}%.`;
+      savingsSubtext = `Total net savings of ${formatCurrency(Math.max(0, stats.totalBalance))} accumulated.`;
+    }
+  }
+
   return (
-    <div className="space-y-8">
+    <div className="space-y-8 select-none">
       {/* Financial Insights Cards Grid */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
         <div className="rounded-xl border border-border bg-card p-5 shadow-2xs space-y-2">
@@ -36,10 +73,10 @@ export const Analytics: React.FC<AnalyticsProps> = ({ transactions }) => {
             <span>Smart Insight</span>
           </div>
           <p className="text-sm font-semibold text-foreground">
-            You spent 12% less on dining this month.
+            {insightHeadline}
           </p>
           <p className="text-xs text-muted-foreground">
-            Great job! Food expenses dropped compared to August.
+            {insightSubtext}
           </p>
         </div>
 
@@ -49,16 +86,10 @@ export const Analytics: React.FC<AnalyticsProps> = ({ transactions }) => {
             <span>Category Highlight</span>
           </div>
           <p className="text-sm font-semibold text-foreground">
-            {topCategories.length > 0
-              ? `${topCategories[0].category} is your top expense category.`
-              : 'Shopping is your top spending category.'}
+            {categoryHeadline}
           </p>
           <p className="text-xs text-muted-foreground">
-            Accounting for{' '}
-            {topCategories.length > 0
-              ? `${topCategories[0].percent.toFixed(1)}%`
-              : '24.5%'}{' '}
-            of total monthly outflow.
+            {categorySubtext}
           </p>
         </div>
 
@@ -68,10 +99,10 @@ export const Analytics: React.FC<AnalyticsProps> = ({ transactions }) => {
             <span>Savings Trend</span>
           </div>
           <p className="text-sm font-semibold text-foreground">
-            Your savings rate increased by +3.1%.
+            {savingsHeadline}
           </p>
           <p className="text-xs text-muted-foreground">
-            Current net savings rate stands strong at 68.7%.
+            {savingsSubtext}
           </p>
         </div>
       </div>

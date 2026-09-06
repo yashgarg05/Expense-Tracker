@@ -4,6 +4,7 @@ import { CashFlowChart } from '../components/dashboard/CashFlowChart';
 import { CategoryChart } from '../components/dashboard/CategoryChart';
 import { RecentTransactions } from '../components/dashboard/RecentTransactions';
 import { formatCurrency } from '@/lib/formatters';
+import { calculateSummaryStats } from '@/lib/calculations';
 import { Wallet, TrendingUp, TrendingDown, PiggyBank } from 'lucide-react';
 
 interface OverviewProps {
@@ -17,21 +18,7 @@ export const Overview: React.FC<OverviewProps> = ({
   onNavigate,
   onOpenAddModal,
 }) => {
-  // Calculate dynamic totals from transaction state
-  const totalIncome = transactions
-    .filter((t) => t.t_type === 'income')
-    .reduce((sum, t) => sum + t.amount, 0);
-
-  const totalExpenses = transactions
-    .filter((t) => t.t_type === 'expense')
-    .reduce((sum, t) => sum + t.amount, 0);
-
-  const totalBalance = totalIncome - totalExpenses;
-
-  const savingsRate =
-    totalIncome > 0
-      ? Math.max(0, parseFloat((((totalIncome - totalExpenses) / totalIncome) * 100).toFixed(1)))
-      : 0;
+  const stats = calculateSummaryStats(transactions);
 
   return (
     <div className="space-y-8">
@@ -39,27 +26,32 @@ export const Overview: React.FC<OverviewProps> = ({
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
         <SummaryCard
           title="Total Balance"
-          amount={formatCurrency(totalBalance)}
-          changePercent={12.4}
+          amount={formatCurrency(stats.totalBalance)}
+          changePercent={stats.balanceMoM.changePercent}
+          changeLabel={stats.balanceMoM.label}
           icon={Wallet}
         />
         <SummaryCard
           title="Income"
-          amount={formatCurrency(totalIncome)}
-          changePercent={8.2}
+          amount={formatCurrency(stats.totalIncome)}
+          changePercent={stats.incomeMoM.changePercent}
+          changeLabel={stats.incomeMoM.label}
           icon={TrendingUp}
         />
         <SummaryCard
           title="Expenses"
-          amount={formatCurrency(totalExpenses)}
-          changePercent={-4.5}
+          amount={formatCurrency(stats.totalExpenses)}
+          changePercent={stats.expenseMoM.changePercent}
+          changeLabel={stats.expenseMoM.label}
           icon={TrendingDown}
           isInverseTrend={true}
         />
         <SummaryCard
           title="Savings Rate"
-          amount={`${savingsRate}%`}
-          changePercent={3.1}
+          amount={`${stats.savingsRate}%`}
+          changePercent={stats.savingsRateMoM.changePercent}
+          changeLabel={stats.savingsRateMoM.label}
+          unit="pp"
           icon={PiggyBank}
         />
       </div>
