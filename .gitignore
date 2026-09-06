@@ -4,6 +4,9 @@
 # Python
 __pycache__/
 *.py[cod]
+build/
+dist/
+*.spec
 
 # Python virtual environments
 .venv/
@@ -19,6 +22,7 @@ frontend/dist/
 
 # Tauri
 frontend/src-tauri/target/
+frontend/src-tauri/bin/
 
 # Environment files
 .env

@@ -1,4 +1,5 @@
 import json
+import os
 import sys
 from pathlib import Path
 
@@ -7,9 +8,15 @@ try:
 except ImportError:
     from models import Transaction
 
-BASE_DIR = Path(__file__).resolve().parent
-DATA_DIR = BASE_DIR / "data"
+env_data_dir = os.environ.get("EXPENSE_TRACKER_DATA_DIR")
+if env_data_dir:
+    DATA_DIR = Path(env_data_dir)
+else:
+    BASE_DIR = Path(__file__).resolve().parent
+    DATA_DIR = BASE_DIR / "data"
+
 FILE_PATH = DATA_DIR / "transactions.json"
+
 
 def load_transactions():
     if not FILE_PATH.exists():
@@ -22,7 +29,7 @@ def load_transactions():
             data = json.loads(content)
             return [Transaction.from_dict(item) for item in data]
     except Exception as e:
-        print(f"Error loading transactions: {e}", file=sys.stderr)
+        print(f"Error loading transactions from {FILE_PATH}: {e}", file=sys.stderr)
         raise e
 
 

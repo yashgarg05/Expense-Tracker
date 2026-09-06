@@ -1,14 +1,7 @@
 use std::path::PathBuf;
+use tauri::{AppHandle, Manager};
 
-fn get_python_binary() -> &'static str {
-  if std::process::Command::new("python3").arg("--version").output().is_ok() {
-    "python3"
-  } else {
-    "python"
-  }
-}
-
-fn get_bridge_path() -> PathBuf {
+fn get_dev_bridge_path() -> PathBuf {
   let cwd = std::env::current_dir().unwrap_or_default();
   let mut curr = cwd.clone();
   loop {
@@ -23,15 +16,81 @@ fn get_bridge_path() -> PathBuf {
   cwd.join("..").join("..").join("backend").join("bridge.py")
 }
 
-fn run_python_bridge(command: &str, payload: Option<serde_json::Value>) -> Result<serde_json::Value, String> {
-  let python_bin = get_python_binary();
-  let bridge_path = get_bridge_path();
+fn get_sidecar_path(app: &AppHandle) -> Option<PathBuf> {
+  // In release / production build, check executable directory (MacOS/) or resource directory
+  if let Ok(exe_path) = std::env::current_exe() {
+    if let Some(exe_dir) = exe_path.parent() {
+      let sidecar_name = format!("pybridge-{}", target_triple());
+      let candidate1 = exe_dir.join(&sidecar_name);
+      if candidate1.exists() {
+        return Some(candidate1);
+      }
+      let candidate2 = exe_dir.join("pybridge");
+      if candidate2.exists() {
+        return Some(candidate2);
+      }
+    }
+  }
+
+  if let Ok(res_dir) = app.path().resource_dir() {
+    let sidecar_name = format!("pybridge-{}", target_triple());
+    let candidate1 = res_dir.join("bin").join(&sidecar_name);
+    if candidate1.exists() {
+      return Some(candidate1);
+    }
+    let candidate2 = res_dir.join("bin").join("pybridge");
+    if candidate2.exists() {
+      return Some(candidate2);
+    }
+  }
+
+  None
+}
+
+fn target_triple() -> &'static str {
+  "aarch64-apple-darwin"
+}
+
+fn run_python_bridge(
+  app: &AppHandle,
+  command: &str,
+  payload: Option<serde_json::Value>,
+) -> Result<serde_json::Value, String> {
+  let app_data_dir = app
+    .path()
+    .app_data_dir()
+    .unwrap_or_else(|_| PathBuf::from("./data"));
+
+  if let Err(e) = std::fs::create_dir_all(&app_data_dir) {
+    eprintln!("Warning: Failed to create app_data_dir {:?}: {}", app_data_dir, e);
+  }
+
+  let sidecar_path = get_sidecar_path(app);
   let payload_str = payload.map(|v| v.to_string()).unwrap_or_else(|| "{}".to_string());
 
-  let output = std::process::Command::new(python_bin)
-    .arg(&bridge_path)
-    .arg(command)
-    .arg(&payload_str)
+  let mut cmd = if let Some(path) = sidecar_path {
+    // Production Sidecar mode
+    let mut c = std::process::Command::new(path);
+    c.arg(command);
+    c.arg(&payload_str);
+    c.env("EXPENSE_TRACKER_DATA_DIR", &app_data_dir);
+    c
+  } else {
+    // Development mode with system python
+    let python_bin = if std::process::Command::new("python3").arg("--version").output().is_ok() {
+      "python3"
+    } else {
+      "python"
+    };
+    let bridge_path = get_dev_bridge_path();
+    let mut c = std::process::Command::new(python_bin);
+    c.arg(&bridge_path);
+    c.arg(command);
+    c.arg(&payload_str);
+    c
+  };
+
+  let output = cmd
     .output()
     .map_err(|e| format!("Failed to execute Python process: {}", e))?;
 
@@ -53,34 +112,34 @@ fn run_python_bridge(command: &str, payload: Option<serde_json::Value>) -> Resul
 }
 
 #[tauri::command]
-fn get_transactions() -> Result<serde_json::Value, String> {
-  run_python_bridge("get_transactions", None)
+fn get_transactions(app: AppHandle) -> Result<serde_json::Value, String> {
+  run_python_bridge(&app, "get_transactions", None)
 }
 
 #[tauri::command]
-fn add_transaction(transaction: serde_json::Value) -> Result<serde_json::Value, String> {
-  run_python_bridge("add_transaction", Some(transaction))
+fn add_transaction(app: AppHandle, transaction: serde_json::Value) -> Result<serde_json::Value, String> {
+  run_python_bridge(&app, "add_transaction", Some(transaction))
 }
 
 #[tauri::command]
-fn update_transaction(transaction: serde_json::Value) -> Result<serde_json::Value, String> {
-  run_python_bridge("update_transaction", Some(transaction))
+fn update_transaction(app: AppHandle, transaction: serde_json::Value) -> Result<serde_json::Value, String> {
+  run_python_bridge(&app, "update_transaction", Some(transaction))
 }
 
 #[tauri::command]
-fn delete_transaction(id: String) -> Result<serde_json::Value, String> {
+fn delete_transaction(app: AppHandle, id: String) -> Result<serde_json::Value, String> {
   let payload = serde_json::json!({ "id": id });
-  run_python_bridge("delete_transaction", Some(payload))
+  run_python_bridge(&app, "delete_transaction", Some(payload))
 }
 
 #[tauri::command]
-fn clear_transactions() -> Result<serde_json::Value, String> {
-  run_python_bridge("clear_transactions", None)
+fn clear_transactions(app: AppHandle) -> Result<serde_json::Value, String> {
+  run_python_bridge(&app, "clear_transactions", None)
 }
 
 #[tauri::command]
-fn get_summary() -> Result<serde_json::Value, String> {
-  run_python_bridge("get_summary", None)
+fn get_summary(app: AppHandle) -> Result<serde_json::Value, String> {
+  run_python_bridge(&app, "get_summary", None)
 }
 
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
@@ -107,4 +166,3 @@ pub fn run() {
     .run(tauri::generate_context!())
     .expect("error while running tauri application");
 }
-
