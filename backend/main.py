@@ -1,5 +1,5 @@
-from models import Transaction
-from engine import ExpenseTracker
+from backend.models import Transaction
+from backend.engine import ExpenseTracker
 from tabulate import tabulate
 from datetime import datetime
 

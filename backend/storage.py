@@ -1,6 +1,6 @@
 import json
 import os
-from models import Transaction
+from backend.models import Transaction
 File_Path = "data/transaction.json"
 
 def load_transactions():
