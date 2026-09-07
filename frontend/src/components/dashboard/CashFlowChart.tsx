@@ -10,7 +10,7 @@ import {
   Legend,
 } from 'recharts';
 import type { Transaction } from '@/types/transaction';
-import { formatCurrency } from '@/lib/formatters';
+import { formatCurrency, parseLocalDate } from '@/lib/formatters';
 
 interface CashFlowChartProps {
   transactions?: Transaction[];
@@ -27,8 +27,8 @@ export const CashFlowChart: React.FC<CashFlowChartProps> = ({
 
     transactions.forEach((tx) => {
       if (!tx.date) return;
-      const d = new Date(tx.date);
-      if (isNaN(d.getTime())) return;
+      const d = parseLocalDate(tx.date);
+      if (!d) return;
 
       const key = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}`;
       const label = d.toLocaleDateString('en-US', { month: 'short', year: '2-digit' });

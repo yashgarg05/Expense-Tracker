@@ -1,4 +1,5 @@
 import type { Transaction } from '@/types/transaction';
+import { parseLocalDate } from '@/lib/formatters';
 
 export interface MoMResult {
   changePercent: number | null;
@@ -71,8 +72,8 @@ export function calculateSummaryStats(
 
   transactions.forEach((tx) => {
     if (!tx.date) return;
-    const d = new Date(tx.date);
-    if (isNaN(d.getTime())) return;
+    const d = parseLocalDate(tx.date);
+    if (!d) return;
 
     const amount = tx.t_type === 'income' ? tx.amount : -tx.amount;
 

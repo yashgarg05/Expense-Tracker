@@ -20,10 +20,23 @@ export function formatCurrency(amount: number): string {
   }).format(amount);
 }
 
+export function parseLocalDate(dateString: string): Date | null {
+  if (!dateString || typeof dateString !== 'string') return null;
+  const parts = dateString.trim().split('-');
+  if (parts.length !== 3) return null;
+  const year = parseInt(parts[0], 10);
+  const month = parseInt(parts[1], 10) - 1;
+  const day = parseInt(parts[2], 10);
+  if (isNaN(year) || isNaN(month) || isNaN(day)) return null;
+  const d = new Date(year, month, day);
+  if (isNaN(d.getTime())) return null;
+  return d;
+}
+
 export function formatDate(dateString: string): string {
   if (!dateString) return '';
-  const date = new Date(dateString);
-  if (isNaN(date.getTime())) return dateString;
+  const date = parseLocalDate(dateString);
+  if (!date) return dateString;
   return date.toLocaleDateString('en-US', {
     month: 'short',
     day: '2-digit',
