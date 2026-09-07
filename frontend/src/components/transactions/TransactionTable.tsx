@@ -64,29 +64,29 @@ export const TransactionTable: React.FC<TransactionTableProps> = ({
   const isFiltered = searchQuery.trim() !== '' || typeFilter !== 'all' || categoryFilter !== 'All';
 
   return (
-    <div className="space-y-4">
-      {/* Controls Bar */}
-      <div className="flex flex-col md:flex-row items-stretch md:items-center justify-between gap-3 bg-card p-4 rounded-xl border border-border shadow-2xs">
+    <div className="space-y-4 select-none">
+      {/* Controls Toolbar */}
+      <div className="flex flex-col md:flex-row items-stretch md:items-center justify-between gap-3 bg-card p-3 md:p-4 rounded-xl border border-border/80 shadow-2xs">
         {/* Search Input */}
-        <div className="relative flex-1 min-w-[200px]">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+        <div className="relative flex-1 min-w-[220px]">
+          <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground/80" />
           <input
             type="text"
             placeholder="Search by title, category, note..."
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            className="w-full rounded-lg border border-input bg-background pl-9 pr-3 py-2 text-xs text-foreground placeholder:text-muted-foreground outline-none focus:border-ring focus:ring-1 focus:ring-ring transition-colors"
+            className="w-full h-9 rounded-lg border border-input bg-background pl-9 pr-3 text-xs text-foreground placeholder:text-muted-foreground/70 outline-none focus:border-ring focus:ring-1 focus:ring-ring transition-colors"
           />
         </div>
 
         {/* Filter & Sort Controls */}
         <div className="flex flex-wrap items-center gap-2">
           {/* Type Segmented Filter */}
-          <div className="flex items-center rounded-lg bg-muted p-1 border border-border text-xs">
+          <div className="flex h-9 items-center rounded-lg bg-muted/70 p-1 border border-border/80 text-xs">
             <button
               onClick={() => setTypeFilter('all')}
               className={cn(
-                'px-2.5 py-1 rounded-md font-medium transition-all',
+                'h-7 px-2.5 rounded-md font-medium transition-all text-xs',
                 typeFilter === 'all'
                   ? 'bg-card text-foreground shadow-2xs font-semibold'
                   : 'text-muted-foreground hover:text-foreground'
@@ -97,7 +97,7 @@ export const TransactionTable: React.FC<TransactionTableProps> = ({
             <button
               onClick={() => setTypeFilter('income')}
               className={cn(
-                'px-2.5 py-1 rounded-md font-medium transition-all',
+                'h-7 px-2.5 rounded-md font-medium transition-all text-xs',
                 typeFilter === 'income'
                   ? 'bg-card text-emerald-600 dark:text-emerald-400 shadow-2xs font-semibold'
                   : 'text-muted-foreground hover:text-foreground'
@@ -108,7 +108,7 @@ export const TransactionTable: React.FC<TransactionTableProps> = ({
             <button
               onClick={() => setTypeFilter('expense')}
               className={cn(
-                'px-2.5 py-1 rounded-md font-medium transition-all',
+                'h-7 px-2.5 rounded-md font-medium transition-all text-xs',
                 typeFilter === 'expense'
                   ? 'bg-card text-foreground shadow-2xs font-semibold'
                   : 'text-muted-foreground hover:text-foreground'
@@ -119,8 +119,8 @@ export const TransactionTable: React.FC<TransactionTableProps> = ({
           </div>
 
           {/* Category Dropdown */}
-          <div className="flex items-center gap-1.5 border border-input rounded-lg bg-background px-2.5 py-1.5 text-xs text-foreground">
-            <Filter className="h-3.5 w-3.5 text-muted-foreground shrink-0" />
+          <div className="flex h-9 items-center gap-1.5 border border-input rounded-lg bg-background px-2.5 text-xs text-foreground hover:border-input focus-within:border-ring focus-within:ring-1 focus-within:ring-ring transition-colors">
+            <Filter className="h-3.5 w-3.5 text-muted-foreground/80 shrink-0" />
             <select
               value={categoryFilter}
               onChange={(e) =>
@@ -137,8 +137,8 @@ export const TransactionTable: React.FC<TransactionTableProps> = ({
           </div>
 
           {/* Sort Dropdown */}
-          <div className="flex items-center gap-1.5 border border-input rounded-lg bg-background px-2.5 py-1.5 text-xs text-foreground">
-            <ArrowUpDown className="h-3.5 w-3.5 text-muted-foreground shrink-0" />
+          <div className="flex h-9 items-center gap-1.5 border border-input rounded-lg bg-background px-2.5 text-xs text-foreground hover:border-input focus-within:border-ring focus-within:ring-1 focus-within:ring-ring transition-colors">
+            <ArrowUpDown className="h-3.5 w-3.5 text-muted-foreground/80 shrink-0" />
             <select
               value={sortMode}
               onChange={(e) => setSortMode(e.target.value as SortMode)}
@@ -154,16 +154,16 @@ export const TransactionTable: React.FC<TransactionTableProps> = ({
       </div>
 
       {/* Table Container */}
-      <div className="rounded-xl border border-border bg-card shadow-2xs overflow-hidden">
+      <div className="rounded-xl border border-border/80 bg-card shadow-2xs overflow-hidden">
         {filteredAndSortedTransactions.length === 0 ? (
           <div className="flex flex-col items-center justify-center py-16 text-center px-4">
-            <div className="flex h-12 w-12 items-center justify-center rounded-full bg-muted text-muted-foreground mb-3">
+            <div className="flex h-12 w-12 items-center justify-center rounded-full bg-muted/70 text-muted-foreground mb-3 border border-border/50">
               <Inbox className="h-6 w-6" />
             </div>
             <h4 className="text-sm font-semibold text-foreground">
               {isFiltered ? 'No matching transactions' : 'No transactions recorded'}
             </h4>
-            <p className="text-xs text-muted-foreground max-w-sm mt-1">
+            <p className="text-xs text-muted-foreground/80 max-w-sm mt-1">
               {isFiltered
                 ? 'Try adjusting your search terms or filters.'
                 : 'Start tracking your income and expenses by adding your first transaction.'}
@@ -195,7 +195,7 @@ export const TransactionTable: React.FC<TransactionTableProps> = ({
           <div className="overflow-x-auto">
             <table className="w-full text-left text-xs border-collapse">
               <thead>
-                <tr className="border-b border-border bg-muted/50 text-muted-foreground font-medium uppercase tracking-wider text-[11px]">
+                <tr className="border-b border-border/80 bg-muted/40 text-muted-foreground font-semibold uppercase tracking-wider text-[10px]">
                   <th className="py-3 px-4">Description</th>
                   <th className="py-3 px-4">Category</th>
                   <th className="py-3 px-4">Date</th>
@@ -204,7 +204,7 @@ export const TransactionTable: React.FC<TransactionTableProps> = ({
                   <th className="py-3 px-4 text-right">Actions</th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-border">
+              <tbody className="divide-y divide-border/60">
                 {filteredAndSortedTransactions.map((tx: Transaction) => {
                   const Icon = getCategoryIcon(tx.category);
                   const isIncome = tx.t_type === 'income';
@@ -212,27 +212,27 @@ export const TransactionTable: React.FC<TransactionTableProps> = ({
                   return (
                     <tr
                       key={tx.id}
-                      className="hover:bg-muted/40 transition-colors group"
+                      className="hover:bg-muted/30 transition-colors group"
                     >
                       {/* Description / Title */}
                       <td className="py-3.5 px-4 font-medium text-foreground">
-                        <div className="flex items-center gap-3">
+                        <div className="flex items-center gap-3 min-w-0">
                           <div
                             className={cn(
-                              'flex h-8 w-8 shrink-0 items-center justify-center rounded-lg border',
+                              'flex h-8 w-8 shrink-0 items-center justify-center rounded-lg border transition-colors',
                               isIncome
                                 ? 'bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border-emerald-500/20'
-                                : 'bg-muted text-foreground border-border'
+                                : 'bg-muted/70 text-foreground border-border/60'
                             )}
                           >
                             <Icon className="h-4 w-4" />
                           </div>
-                          <div className="flex flex-col truncate max-w-xs">
+                          <div className="flex flex-col truncate max-w-xs min-w-0">
                             <span className="font-semibold text-foreground truncate">
                               {tx.title}
                             </span>
                             {tx.note && (
-                              <span className="text-[11px] text-muted-foreground truncate">
+                              <span className="text-[11px] text-muted-foreground/80 truncate">
                                 {tx.note}
                               </span>
                             )}
@@ -242,13 +242,13 @@ export const TransactionTable: React.FC<TransactionTableProps> = ({
 
                       {/* Category */}
                       <td className="py-3.5 px-4">
-                        <span className="inline-flex items-center px-2 py-0.5 rounded-md text-[11px] font-medium bg-muted text-muted-foreground border border-border">
+                        <span className="inline-flex items-center px-2 py-0.5 rounded-md text-[11px] font-medium bg-muted/70 text-muted-foreground border border-border/60">
                           {tx.category}
                         </span>
                       </td>
 
                       {/* Date */}
-                      <td className="py-3.5 px-4 text-muted-foreground font-mono">
+                      <td className="py-3.5 px-4 text-muted-foreground/90 font-mono text-xs">
                         {formatDate(tx.date)}
                       </td>
 
@@ -256,10 +256,10 @@ export const TransactionTable: React.FC<TransactionTableProps> = ({
                       <td className="py-3.5 px-4">
                         <span
                           className={cn(
-                            'inline-flex items-center px-2 py-0.5 rounded-sm text-[10px] font-semibold uppercase tracking-wider',
+                            'inline-flex items-center px-2 py-0.5 rounded-md text-[10px] font-semibold uppercase tracking-wider border',
                             isIncome
-                              ? 'bg-emerald-500/10 text-emerald-700 dark:text-emerald-400'
-                              : 'bg-muted text-muted-foreground'
+                              ? 'bg-emerald-500/10 text-emerald-700 dark:text-emerald-400 border-emerald-500/20'
+                              : 'bg-muted/70 text-muted-foreground border-border/60'
                           )}
                         >
                           {tx.t_type}
@@ -282,7 +282,7 @@ export const TransactionTable: React.FC<TransactionTableProps> = ({
 
                       {/* Actions */}
                       <td className="py-3.5 px-4 text-right">
-                        <div className="flex items-center justify-end gap-1">
+                        <div className="flex items-center justify-end gap-1 opacity-70 group-hover:opacity-100 transition-opacity">
                           <button
                             onClick={() => onEdit(tx)}
                             disabled={isDeleting}

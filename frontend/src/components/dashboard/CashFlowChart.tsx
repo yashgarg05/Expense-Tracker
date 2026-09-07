@@ -55,20 +55,20 @@ export const CashFlowChart: React.FC<CashFlowChartProps> = ({
   }, [transactions]);
 
   return (
-    <div className="rounded-xl border border-border bg-card p-6 shadow-2xs">
+    <div className="rounded-xl border border-border/80 bg-card p-6 shadow-2xs select-none flex flex-col justify-between">
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-1 pb-4">
         <div>
-          <h3 className="text-base font-semibold text-foreground">
+          <h3 className="text-sm font-semibold tracking-tight text-foreground">
             Income vs Expenses
           </h3>
-          <p className="text-xs text-muted-foreground">
+          <p className="text-xs text-muted-foreground/80">
             Your monthly cash flow breakdown
           </p>
         </div>
       </div>
 
       {chartData.length === 0 ? (
-        <div className="flex h-72 items-center justify-center text-xs text-muted-foreground">
+        <div className="flex h-72 items-center justify-center text-xs text-muted-foreground/80">
           No transaction history available to plot cash flow.
         </div>
       ) : (
@@ -83,13 +83,13 @@ export const CashFlowChart: React.FC<CashFlowChartProps> = ({
                 strokeDasharray="3 3"
                 vertical={false}
                 stroke="var(--border)"
-                opacity={0.6}
+                opacity={0.5}
               />
               <XAxis
                 dataKey="month"
                 axisLine={false}
                 tickLine={false}
-                tick={{ fill: 'var(--muted-foreground)', fontSize: 12 }}
+                tick={{ fill: 'var(--muted-foreground)', fontSize: 11 }}
                 dy={6}
               />
               <YAxis
@@ -102,10 +102,11 @@ export const CashFlowChart: React.FC<CashFlowChartProps> = ({
                 contentStyle={{
                   backgroundColor: 'var(--popover)',
                   borderColor: 'var(--border)',
-                  borderRadius: '8px',
+                  borderRadius: '10px',
                   color: 'var(--popover-foreground)',
                   fontSize: '12px',
-                  boxShadow: '0 4px 6px -1px rgba(0,0,0,0.1)',
+                  boxShadow: '0 10px 15px -3px rgba(0,0,0,0.1), 0 4px 6px -4px rgba(0,0,0,0.1)',
+                  padding: '8px 12px',
                 }}
                 formatter={(value?: number | string | ReadonlyArray<number | string>) => [
                   formatCurrency(Number(Array.isArray(value) ? value[0] : value || 0)),
@@ -115,7 +116,7 @@ export const CashFlowChart: React.FC<CashFlowChartProps> = ({
               <Legend
                 verticalAlign="top"
                 align="right"
-                wrapperStyle={{ paddingBottom: '12px', fontSize: '12px' }}
+                wrapperStyle={{ paddingBottom: '12px', fontSize: '11px', fontWeight: 500 }}
               />
               <Bar
                 dataKey="Income"

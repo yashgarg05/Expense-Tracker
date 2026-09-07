@@ -30,6 +30,7 @@ export const Overview: React.FC<OverviewProps> = ({
           changePercent={stats.balanceMoM.changePercent}
           changeLabel={stats.balanceMoM.label}
           icon={Wallet}
+          isPrimary={true}
         />
         <SummaryCard
           title="Income"

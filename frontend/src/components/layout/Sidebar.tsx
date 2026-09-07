@@ -38,15 +38,15 @@ export const Sidebar: React.FC<SidebarProps> = ({
       <div className="space-y-6">
         {/* Brand Header */}
         <div className="flex items-center justify-between px-2 pt-1">
-          <div className="flex items-center gap-2.5">
-            <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-primary text-primary-foreground shadow-sm">
-              <Wallet className="h-5 w-5" />
+          <div className="flex items-center gap-3">
+            <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-primary text-primary-foreground shadow-xs border border-primary/20 shrink-0">
+              <Wallet className="h-4.5 w-4.5" />
             </div>
-            <div className="flex flex-col">
-              <span className="font-semibold text-sm tracking-tight text-foreground">
+            <div className="flex flex-col min-w-0">
+              <span className="font-semibold text-sm tracking-tight text-foreground truncate">
                 Expense Tracker
               </span>
-              <span className="text-[11px] font-medium text-muted-foreground">
+              <span className="text-[11px] font-medium text-muted-foreground/80 truncate">
                 Desktop Edition
               </span>
             </div>
@@ -63,7 +63,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
 
         {/* Navigation Section */}
         <nav className="space-y-1">
-          <div className="px-2 pb-1 text-[11px] font-medium uppercase tracking-wider text-muted-foreground/70">
+          <div className="px-2 pb-1.5 text-[10px] font-semibold uppercase tracking-wider text-muted-foreground/70">
             Main Menu
           </div>
           {navItems.map((item) => {
@@ -75,16 +75,19 @@ export const Sidebar: React.FC<SidebarProps> = ({
                 onClick={() => handleNavClick(item.id)}
                 aria-current={isActive ? 'page' : undefined}
                 className={cn(
-                  'flex w-full items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-all duration-150 outline-none focus-visible:ring-2 focus-visible:ring-ring',
+                  'relative flex w-full items-center gap-3 rounded-lg px-3 py-2 text-xs font-medium transition-all duration-150 outline-none focus-visible:ring-2 focus-visible:ring-ring active:scale-[0.99]',
                   isActive
-                    ? 'bg-sidebar-accent text-sidebar-accent-foreground font-semibold shadow-xs'
-                    : 'text-muted-foreground hover:bg-sidebar-accent/50 hover:text-foreground'
+                    ? 'bg-sidebar-accent text-foreground font-semibold shadow-2xs'
+                    : 'text-muted-foreground hover:bg-sidebar-accent/60 hover:text-foreground'
                 )}
               >
+                {isActive && (
+                  <span className="absolute left-0 top-1.5 bottom-1.5 w-1 rounded-r-full bg-primary" />
+                )}
                 <Icon
                   className={cn(
                     'h-4 w-4 shrink-0 transition-colors',
-                    isActive ? 'text-foreground' : 'text-muted-foreground'
+                    isActive ? 'text-primary' : 'text-muted-foreground/80'
                   )}
                 />
                 <span>{item.label}</span>
@@ -94,27 +97,30 @@ export const Sidebar: React.FC<SidebarProps> = ({
         </nav>
 
         {/* Divider & System Section */}
-        <div className="pt-2">
-          <div className="h-px bg-sidebar-border mx-2 mb-3" />
-          <div className="px-2 pb-1 text-[11px] font-medium uppercase tracking-wider text-muted-foreground/70">
+        <div className="pt-2 space-y-1">
+          <div className="h-px bg-sidebar-border/80 mx-2 mb-3" />
+          <div className="px-2 pb-1.5 text-[10px] font-semibold uppercase tracking-wider text-muted-foreground/70">
             System
           </div>
           <button
             onClick={() => handleNavClick('settings')}
             aria-current={activePage === 'settings' ? 'page' : undefined}
             className={cn(
-              'flex w-full items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-all duration-150 outline-none focus-visible:ring-2 focus-visible:ring-ring',
+              'relative flex w-full items-center gap-3 rounded-lg px-3 py-2 text-xs font-medium transition-all duration-150 outline-none focus-visible:ring-2 focus-visible:ring-ring active:scale-[0.99]',
               activePage === 'settings'
-                ? 'bg-sidebar-accent text-sidebar-accent-foreground font-semibold shadow-xs'
-                : 'text-muted-foreground hover:bg-sidebar-accent/50 hover:text-foreground'
+                ? 'bg-sidebar-accent text-foreground font-semibold shadow-2xs'
+                : 'text-muted-foreground hover:bg-sidebar-accent/60 hover:text-foreground'
             )}
           >
+            {activePage === 'settings' && (
+              <span className="absolute left-0 top-1.5 bottom-1.5 w-1 rounded-r-full bg-primary" />
+            )}
             <Settings
               className={cn(
                 'h-4 w-4 shrink-0 transition-colors',
                 activePage === 'settings'
-                  ? 'text-foreground'
-                  : 'text-muted-foreground'
+                  ? 'text-primary'
+                  : 'text-muted-foreground/80'
               )}
             />
             <span>Settings</span>
@@ -123,16 +129,16 @@ export const Sidebar: React.FC<SidebarProps> = ({
       </div>
 
       {/* User Profile Footer */}
-      <div className="pt-4 border-t border-sidebar-border mt-auto">
-        <div className="flex items-center gap-3 rounded-xl p-2 hover:bg-sidebar-accent/50 transition-colors cursor-pointer">
-          <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-primary/10 text-primary font-semibold text-xs border border-primary/20">
+      <div className="pt-3 border-t border-sidebar-border/80 mt-auto">
+        <div className="flex items-center gap-3 rounded-xl p-2 hover:bg-sidebar-accent/60 transition-all cursor-pointer group">
+          <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-primary/10 text-primary font-bold text-xs border border-primary/20 shadow-2xs group-hover:border-primary/30 transition-colors">
             YG
           </div>
-          <div className="flex flex-col truncate">
+          <div className="flex flex-col truncate min-w-0">
             <span className="text-xs font-semibold text-foreground truncate">
               Yash Garg
             </span>
-            <span className="text-[11px] text-muted-foreground truncate">
+            <span className="text-[11px] text-muted-foreground/80 truncate">
               Personal Account
             </span>
           </div>

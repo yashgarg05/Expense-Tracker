@@ -16,20 +16,20 @@ export const Header: React.FC<HeaderProps> = ({
   onOpenMobileMenu,
 }) => {
   return (
-    <header className="sticky top-0 z-30 flex h-16 items-center justify-between border-b border-border bg-background/95 backdrop-blur-xs px-4 md:px-8 py-3 transition-colors">
+    <header className="sticky top-0 z-30 flex h-14 md:h-16 items-center justify-between border-b border-border/80 bg-background/80 backdrop-blur-md px-4 md:px-8 transition-colors select-none">
       <div className="flex items-center gap-3">
         <button
           onClick={onOpenMobileMenu}
-          className="md:hidden p-2 rounded-lg text-muted-foreground hover:bg-muted transition-colors outline-none focus-visible:ring-2 focus-visible:ring-ring"
+          className="md:hidden p-1.5 rounded-lg text-muted-foreground hover:bg-muted transition-colors outline-none focus-visible:ring-2 focus-visible:ring-ring"
           aria-label="Open navigation menu"
         >
           <Menu className="h-5 w-5" />
         </button>
-        <div className="flex flex-col">
-          <h1 className="text-lg font-semibold tracking-tight text-foreground">
+        <div className="flex flex-col justify-center">
+          <h1 className="text-base md:text-lg font-semibold tracking-tight text-foreground">
             {title}
           </h1>
-          <p className="text-xs text-muted-foreground hidden sm:block">
+          <p className="text-xs text-muted-foreground/80 hidden sm:block">
             {subtitle}
           </p>
         </div>
@@ -39,7 +39,7 @@ export const Header: React.FC<HeaderProps> = ({
         <Button
           onClick={onOpenAddModal}
           size="sm"
-          className="flex items-center gap-1.5 font-medium shadow-xs"
+          className="flex items-center gap-1.5 font-medium shadow-xs transition-all active:scale-[0.98]"
         >
           <Plus className="h-4 w-4" />
           <span>Add Transaction</span>

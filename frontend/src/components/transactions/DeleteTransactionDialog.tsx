@@ -23,9 +23,9 @@ export const DeleteTransactionDialog: React.FC<
       />
 
       {/* Confirmation Card */}
-      <div className="relative z-50 w-full max-w-sm rounded-xl border border-border bg-card p-6 shadow-2xl space-y-5 text-foreground select-none animate-in fade-in zoom-in-95 duration-150">
+      <div className="relative z-50 w-full max-w-sm rounded-2xl border border-border/80 bg-card p-6 shadow-2xl space-y-5 text-foreground select-none animate-in fade-in zoom-in-95 duration-150">
         <div className="flex items-start justify-between">
-          <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-rose-500/10 text-rose-600 dark:text-rose-400">
+          <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-rose-500/10 text-rose-600 dark:text-rose-400 border border-rose-500/20">
             <AlertTriangle className="h-5 w-5" />
           </div>
           <button
@@ -37,20 +37,20 @@ export const DeleteTransactionDialog: React.FC<
           </button>
         </div>
 
-        <div className="space-y-1">
-          <h3 className="text-base font-semibold text-foreground">
+        <div className="space-y-1.5">
+          <h3 className="text-base font-semibold text-foreground tracking-tight">
             Delete transaction?
           </h3>
-          <p className="text-xs text-muted-foreground leading-relaxed">
+          <p className="text-xs text-muted-foreground/80 leading-relaxed">
             Are you sure you want to delete{' '}
-            <span className="font-medium text-foreground">
+            <span className="font-semibold text-foreground">
               "{transaction.title}"
             </span>
             ? This action cannot be undone in local state.
           </p>
         </div>
 
-        <div className="flex items-center justify-end gap-2 pt-2">
+        <div className="flex items-center justify-end gap-2 pt-2 border-t border-border/60">
           <Button variant="outline" size="sm" onClick={onClose}>
             Cancel
           </Button>

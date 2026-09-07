@@ -85,14 +85,14 @@ export const TransactionDialog: React.FC<TransactionDialogProps> = ({
       />
 
       {/* Modal Dialog Content */}
-      <div className="relative z-50 w-full max-w-lg rounded-xl border border-border bg-card p-6 shadow-2xl space-y-6 text-foreground select-none animate-in fade-in zoom-in-95 duration-150">
+      <div className="relative z-50 w-full max-w-md md:max-w-lg rounded-2xl border border-border/80 bg-card p-6 shadow-2xl space-y-5 text-foreground select-none animate-in fade-in zoom-in-95 duration-150">
         {/* Header */}
-        <div className="flex items-center justify-between border-b border-border pb-4">
+        <div className="flex items-center justify-between border-b border-border/80 pb-4">
           <div>
-            <h2 className="text-lg font-semibold tracking-tight text-foreground">
+            <h2 className="text-base font-semibold tracking-tight text-foreground">
               {initialData ? 'Edit Transaction' : 'Add Transaction'}
             </h2>
-            <p className="text-xs text-muted-foreground">
+            <p className="text-xs text-muted-foreground/80">
               {initialData
                 ? 'Update transaction details in your backend.'
                 : 'Record a new income or expense item.'}
@@ -113,7 +113,7 @@ export const TransactionDialog: React.FC<TransactionDialogProps> = ({
           {/* Transaction Type Segmented Switch */}
           <div className="space-y-1">
             <label className="font-medium text-foreground">Type</label>
-            <div className="grid grid-cols-2 gap-1 rounded-lg bg-muted p-1 border border-border">
+            <div className="grid grid-cols-2 gap-1 rounded-lg bg-muted/70 p-1 border border-border/80">
               <button
                 type="button"
                 disabled={isSaving}
@@ -124,7 +124,7 @@ export const TransactionDialog: React.FC<TransactionDialogProps> = ({
                   }
                 }}
                 className={cn(
-                  'rounded-md py-1.5 font-medium transition-all text-xs',
+                  'h-7 rounded-md py-1 font-medium transition-all text-xs',
                   tType === 'expense'
                     ? 'bg-card text-foreground shadow-2xs font-semibold'
                     : 'text-muted-foreground hover:text-foreground'
@@ -142,7 +142,7 @@ export const TransactionDialog: React.FC<TransactionDialogProps> = ({
                   }
                 }}
                 className={cn(
-                  'rounded-md py-1.5 font-medium transition-all text-xs',
+                  'h-7 rounded-md py-1 font-medium transition-all text-xs',
                   tType === 'income'
                     ? 'bg-card text-emerald-600 dark:text-emerald-400 shadow-2xs font-semibold'
                     : 'text-muted-foreground hover:text-foreground'
@@ -166,7 +166,7 @@ export const TransactionDialog: React.FC<TransactionDialogProps> = ({
               value={title}
               onChange={(e) => setTitle(e.target.value)}
               className={cn(
-                'w-full rounded-lg border bg-background px-3 py-2 text-xs text-foreground placeholder:text-muted-foreground outline-none focus:border-ring focus:ring-1 focus:ring-ring transition-colors disabled:opacity-60',
+                'w-full h-9 rounded-lg border bg-background px-3 text-xs text-foreground placeholder:text-muted-foreground/70 outline-none focus:border-ring focus:ring-1 focus:ring-ring transition-colors disabled:opacity-60',
                 errors.title ? 'border-rose-500' : 'border-input'
               )}
             />
@@ -191,7 +191,7 @@ export const TransactionDialog: React.FC<TransactionDialogProps> = ({
                 value={amount}
                 onChange={(e) => setAmount(e.target.value)}
                 className={cn(
-                  'w-full rounded-lg border bg-background px-3 py-2 text-xs font-mono text-foreground placeholder:text-muted-foreground outline-none focus:border-ring focus:ring-1 focus:ring-ring transition-colors disabled:opacity-60',
+                  'w-full h-9 rounded-lg border bg-background px-3 text-xs font-mono text-foreground placeholder:text-muted-foreground/70 outline-none focus:border-ring focus:ring-1 focus:ring-ring transition-colors disabled:opacity-60',
                   errors.amount ? 'border-rose-500' : 'border-input'
                 )}
               />
@@ -210,7 +210,7 @@ export const TransactionDialog: React.FC<TransactionDialogProps> = ({
                 disabled={isSaving}
                 value={category}
                 onChange={(e) => setCategory(e.target.value as CategoryType)}
-                className="w-full rounded-lg border border-input bg-background px-3 py-2 text-xs text-foreground outline-none focus:border-ring focus:ring-1 focus:ring-ring transition-colors disabled:opacity-60"
+                className="w-full h-9 rounded-lg border border-input bg-background px-3 text-xs text-foreground outline-none focus:border-ring focus:ring-1 focus:ring-ring transition-colors disabled:opacity-60 cursor-pointer"
               >
                 {CATEGORIES.map((cat) => (
                   <option key={cat} value={cat}>
@@ -233,7 +233,7 @@ export const TransactionDialog: React.FC<TransactionDialogProps> = ({
               value={date}
               onChange={(e) => setDate(e.target.value)}
               className={cn(
-                'w-full rounded-lg border bg-background px-3 py-2 text-xs text-foreground outline-none focus:border-ring focus:ring-1 focus:ring-ring transition-colors disabled:opacity-60',
+                'w-full h-9 rounded-lg border bg-background px-3 text-xs text-foreground outline-none focus:border-ring focus:ring-1 focus:ring-ring transition-colors disabled:opacity-60',
                 errors.date ? 'border-rose-500' : 'border-input'
               )}
             />
@@ -254,12 +254,12 @@ export const TransactionDialog: React.FC<TransactionDialogProps> = ({
               placeholder="Add extra details or comments..."
               value={note}
               onChange={(e) => setNote(e.target.value)}
-              className="w-full rounded-lg border border-input bg-background px-3 py-2 text-xs text-foreground placeholder:text-muted-foreground outline-none focus:border-ring focus:ring-1 focus:ring-ring transition-colors resize-none disabled:opacity-60"
+              className="w-full rounded-lg border border-input bg-background px-3 py-2 text-xs text-foreground placeholder:text-muted-foreground/70 outline-none focus:border-ring focus:ring-1 focus:ring-ring transition-colors resize-none disabled:opacity-60"
             />
           </div>
 
           {/* Dialog Action Buttons */}
-          <div className="flex items-center justify-end gap-2 pt-3 border-t border-border">
+          <div className="flex items-center justify-end gap-2 pt-3 border-t border-border/80">
             <Button type="button" variant="outline" size="sm" onClick={onClose} disabled={isSaving}>
               Cancel
             </Button>

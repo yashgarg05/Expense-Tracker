@@ -39,18 +39,18 @@ export const CategoryChart: React.FC<CategoryChartProps> = ({
     .sort((a, b) => b.value - a.value);
 
   return (
-    <div className="rounded-xl border border-border bg-card p-6 shadow-2xs flex flex-col justify-between">
+    <div className="rounded-xl border border-border/80 bg-card p-6 shadow-2xs select-none flex flex-col justify-between">
       <div>
-        <h3 className="text-base font-semibold text-foreground">
+        <h3 className="text-sm font-semibold tracking-tight text-foreground">
           Spending by Category
         </h3>
-        <p className="text-xs text-muted-foreground">
+        <p className="text-xs text-muted-foreground/80">
           Distribution of expenses across categories
         </p>
       </div>
 
       {chartData.length === 0 ? (
-        <div className="flex h-56 items-center justify-center text-xs text-muted-foreground">
+        <div className="flex h-56 items-center justify-center text-xs text-muted-foreground/80">
           No expenses recorded yet.
         </div>
       ) : (
@@ -76,9 +76,11 @@ export const CategoryChart: React.FC<CategoryChartProps> = ({
                   contentStyle={{
                     backgroundColor: 'var(--popover)',
                     borderColor: 'var(--border)',
-                    borderRadius: '8px',
+                    borderRadius: '10px',
                     color: 'var(--popover-foreground)',
                     fontSize: '12px',
+                    boxShadow: '0 10px 15px -3px rgba(0,0,0,0.1), 0 4px 6px -4px rgba(0,0,0,0.1)',
+                    padding: '8px 12px',
                   }}
                   formatter={(value?: number | string | ReadonlyArray<number | string>) => [
                     formatCurrency(Number(Array.isArray(value) ? value[0] : value || 0)),
@@ -88,25 +90,25 @@ export const CategoryChart: React.FC<CategoryChartProps> = ({
               </PieChart>
             </ResponsiveContainer>
             <div className="absolute inset-0 flex flex-col items-center justify-center pointer-events-none">
-              <span className="text-[11px] font-medium text-muted-foreground uppercase">
+              <span className="text-[10px] font-semibold text-muted-foreground/70 uppercase tracking-wider">
                 Total
               </span>
-              <span className="text-sm font-bold text-foreground">
+              <span className="text-sm font-bold text-foreground font-mono">
                 {formatCurrency(totalExpense)}
               </span>
             </div>
           </div>
 
           {/* Category Legend List */}
-          <div className="md:col-span-6 space-y-2.5 max-h-56 overflow-y-auto pr-1">
+          <div className="md:col-span-6 space-y-2 max-h-56 overflow-y-auto pr-1">
             {chartData.map((item) => (
               <div
                 key={item.name}
-                className="flex items-center justify-between text-xs"
+                className="flex items-center justify-between text-xs py-0.5"
               >
                 <div className="flex items-center gap-2 truncate">
                   <span
-                    className="h-2.5 w-2.5 rounded-full shrink-0"
+                    className="h-2.5 w-2.5 rounded-full shrink-0 shadow-2xs"
                     style={{ backgroundColor: item.color }}
                   />
                   <span className="font-medium text-foreground truncate">
@@ -114,7 +116,7 @@ export const CategoryChart: React.FC<CategoryChartProps> = ({
                   </span>
                 </div>
                 <div className="flex items-center gap-2 font-mono">
-                  <span className="text-muted-foreground">{item.percentage}%</span>
+                  <span className="text-muted-foreground/80 text-[11px]">{item.percentage}%</span>
                   <span className="font-semibold text-foreground">
                     {formatCurrency(item.value)}
                   </span>

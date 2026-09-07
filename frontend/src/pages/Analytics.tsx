@@ -67,41 +67,41 @@ export const Analytics: React.FC<AnalyticsProps> = ({ transactions }) => {
     <div className="space-y-8 select-none">
       {/* Financial Insights Cards Grid */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-        <div className="rounded-xl border border-border bg-card p-5 shadow-2xs space-y-2">
+        <div className="rounded-xl border border-border/80 bg-card p-5 shadow-2xs space-y-2 hover:border-border transition-colors">
           <div className="flex items-center gap-2 text-xs font-semibold text-emerald-600 dark:text-emerald-400">
-            <Sparkles className="h-4 w-4" />
+            <Sparkles className="h-4 w-4 shrink-0" />
             <span>Smart Insight</span>
           </div>
-          <p className="text-sm font-semibold text-foreground">
+          <p className="text-sm font-semibold text-foreground tracking-tight">
             {insightHeadline}
           </p>
-          <p className="text-xs text-muted-foreground">
+          <p className="text-xs text-muted-foreground/80 leading-relaxed">
             {insightSubtext}
           </p>
         </div>
 
-        <div className="rounded-xl border border-border bg-card p-5 shadow-2xs space-y-2">
+        <div className="rounded-xl border border-border/80 bg-card p-5 shadow-2xs space-y-2 hover:border-border transition-colors">
           <div className="flex items-center gap-2 text-xs font-semibold text-primary">
-            <Award className="h-4 w-4" />
+            <Award className="h-4 w-4 shrink-0" />
             <span>Category Highlight</span>
           </div>
-          <p className="text-sm font-semibold text-foreground">
+          <p className="text-sm font-semibold text-foreground tracking-tight">
             {categoryHeadline}
           </p>
-          <p className="text-xs text-muted-foreground">
+          <p className="text-xs text-muted-foreground/80 leading-relaxed">
             {categorySubtext}
           </p>
         </div>
 
-        <div className="rounded-xl border border-border bg-card p-5 shadow-2xs space-y-2">
+        <div className="rounded-xl border border-border/80 bg-card p-5 shadow-2xs space-y-2 hover:border-border transition-colors">
           <div className="flex items-center gap-2 text-xs font-semibold text-amber-600 dark:text-amber-400">
-            <ArrowUpRight className="h-4 w-4" />
+            <ArrowUpRight className="h-4 w-4 shrink-0" />
             <span>Savings Trend</span>
           </div>
-          <p className="text-sm font-semibold text-foreground">
+          <p className="text-sm font-semibold text-foreground tracking-tight">
             {savingsHeadline}
           </p>
-          <p className="text-xs text-muted-foreground">
+          <p className="text-xs text-muted-foreground/80 leading-relaxed">
             {savingsSubtext}
           </p>
         </div>
@@ -118,28 +118,28 @@ export const Analytics: React.FC<AnalyticsProps> = ({ transactions }) => {
       </div>
 
       {/* Top Spending Categories Progress List */}
-      <div className="rounded-xl border border-border bg-card p-6 shadow-2xs space-y-4">
+      <div className="rounded-xl border border-border/80 bg-card p-6 shadow-2xs space-y-4">
         <div>
-          <h3 className="text-base font-semibold text-foreground">
+          <h3 className="text-sm font-semibold tracking-tight text-foreground">
             Top Spending Breakdown
           </h3>
-          <p className="text-xs text-muted-foreground">
+          <p className="text-xs text-muted-foreground/80">
             Categories ranking by overall expenditure
           </p>
         </div>
 
         <div className="space-y-4">
           {topCategories.length === 0 ? (
-            <p className="text-xs text-muted-foreground py-4 text-center">
+            <p className="text-xs text-muted-foreground/80 py-4 text-center">
               No expense data available for analytics breakdown.
             </p>
           ) : (
             topCategories.map((item) => (
               <div key={item.category} className="space-y-1.5">
                 <div className="flex items-center justify-between text-xs font-medium">
-                  <span className="text-foreground">{item.category}</span>
+                  <span className="text-foreground font-semibold">{item.category}</span>
                   <div className="flex items-center gap-2 font-mono">
-                    <span className="text-muted-foreground">
+                    <span className="text-muted-foreground/80 text-[11px]">
                       {item.percent.toFixed(1)}%
                     </span>
                     <span className="font-semibold text-foreground">
@@ -148,7 +148,7 @@ export const Analytics: React.FC<AnalyticsProps> = ({ transactions }) => {
                   </div>
                 </div>
                 {/* Progress Bar */}
-                <div className="h-2 w-full rounded-full bg-muted overflow-hidden">
+                <div className="h-2 w-full rounded-full bg-muted/70 overflow-hidden border border-border/40">
                   <div
                     className="h-full rounded-full transition-all duration-300"
                     style={{
