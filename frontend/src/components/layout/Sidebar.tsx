@@ -73,8 +73,9 @@ export const Sidebar: React.FC<SidebarProps> = ({
               <button
                 key={item.id}
                 onClick={() => handleNavClick(item.id)}
+                aria-current={isActive ? 'page' : undefined}
                 className={cn(
-                  'flex w-full items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-all duration-150',
+                  'flex w-full items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-all duration-150 outline-none focus-visible:ring-2 focus-visible:ring-ring',
                   isActive
                     ? 'bg-sidebar-accent text-sidebar-accent-foreground font-semibold shadow-xs'
                     : 'text-muted-foreground hover:bg-sidebar-accent/50 hover:text-foreground'
@@ -100,8 +101,9 @@ export const Sidebar: React.FC<SidebarProps> = ({
           </div>
           <button
             onClick={() => handleNavClick('settings')}
+            aria-current={activePage === 'settings' ? 'page' : undefined}
             className={cn(
-              'flex w-full items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-all duration-150',
+              'flex w-full items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-all duration-150 outline-none focus-visible:ring-2 focus-visible:ring-ring',
               activePage === 'settings'
                 ? 'bg-sidebar-accent text-sidebar-accent-foreground font-semibold shadow-xs'
                 : 'text-muted-foreground hover:bg-sidebar-accent/50 hover:text-foreground'

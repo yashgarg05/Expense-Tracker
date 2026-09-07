@@ -20,7 +20,7 @@ export const Header: React.FC<HeaderProps> = ({
       <div className="flex items-center gap-3">
         <button
           onClick={onOpenMobileMenu}
-          className="md:hidden p-2 rounded-lg text-muted-foreground hover:bg-muted transition-colors"
+          className="md:hidden p-2 rounded-lg text-muted-foreground hover:bg-muted transition-colors outline-none focus-visible:ring-2 focus-visible:ring-ring"
           aria-label="Open navigation menu"
         >
           <Menu className="h-5 w-5" />

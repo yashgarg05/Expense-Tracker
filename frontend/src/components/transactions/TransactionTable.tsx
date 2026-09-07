@@ -286,7 +286,8 @@ export const TransactionTable: React.FC<TransactionTableProps> = ({
                           <button
                             onClick={() => onEdit(tx)}
                             disabled={isDeleting}
-                            className="p-1.5 rounded-md text-muted-foreground hover:bg-muted hover:text-foreground transition-colors disabled:opacity-50"
+                            aria-label={`Edit ${tx.title}`}
+                            className="p-1.5 rounded-md text-muted-foreground hover:bg-muted hover:text-foreground transition-colors disabled:opacity-50 outline-none focus-visible:ring-2 focus-visible:ring-ring"
                             title="Edit transaction"
                           >
                             <Edit2 className="h-3.5 w-3.5" />
@@ -294,7 +295,8 @@ export const TransactionTable: React.FC<TransactionTableProps> = ({
                           <button
                             onClick={() => onDelete(tx)}
                             disabled={isDeleting}
-                            className="p-1.5 rounded-md text-muted-foreground hover:bg-rose-500/10 hover:text-rose-600 dark:hover:text-rose-400 transition-colors disabled:opacity-50"
+                            aria-label={`Delete ${tx.title}`}
+                            className="p-1.5 rounded-md text-muted-foreground hover:bg-rose-500/10 hover:text-rose-600 dark:hover:text-rose-400 transition-colors disabled:opacity-50 outline-none focus-visible:ring-2 focus-visible:ring-ring"
                             title="Delete transaction"
                           >
                             <Trash2 className="h-3.5 w-3.5" />
